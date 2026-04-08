@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ANS Virtual Practical — PhysioLab | UKZN HPHY210</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:#f7f8fa; --surface:#ffffff; --surface2:#f1f3f7;
+      --border:rgba(0,0,0,0.1); --border2:rgba(0,0,0,0.18);
+      --text:#1a1a1a; --text2:#555; --text3:#888;
+      --blue:#185FA5; --blue-lt:#E6F1FB; --blue-dk:#0C447C;
+      --red:#A32D2D; --red-lt:#FCEBEB; --red-dk:#791F1F;
+      --teal:#0F6E56; --teal-lt:#E1F5EE; --teal-dk:#085041;
+      --amber:#BA7517; --amber-lt:#FAEEDA; --amber-dk:#633806;
+      --purple:#534AB7; --purple-lt:#EEEDFE; --purple-dk:#3C3489;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#111214; --surface:#1c1e22; --surface2:#252830;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+        --text:#e8e8e8; --text2:#aaa; --text3:#666;
+        --blue-lt:#0d2e52; --blue-dk:#90c4f0;
+        --red-lt:#3a1212; --red-dk:#f09090;
+        --teal-lt:#0a2e23; --teal-dk:#5de0b0;
+        --amber-lt:#2e1e05; --amber-dk:#f0b84a;
+        --purple-lt:#1e1a44; --purple-dk:#b0abf0;
+      }
+    }
+
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6; }
+
+    .topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; gap:14px; height:54px; position:sticky; top:0; z-index:100; }
+    .logo-pill { background:var(--blue-lt); color:var(--blue); font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; letter-spacing:.5px; }
+    .topbar-title { font-size:15px; font-weight:600; }
+    .topbar-sub { font-size:12px; color:var(--text3); margin-left:auto; }
+
+    .page-wrap { max-width:900px; margin:0 auto; padding:30px 20px 60px; }
+
+    .module-header { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px 26px; margin-bottom:22px; display:flex; gap:16px; align-items:flex-start; }
+    .module-icon { width:46px; height:46px; border-radius:12px; background:var(--blue-lt); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .module-header h1 { font-size:22px; font-weight:700; margin-bottom:4px; }
+    .module-header p { font-size:14px; color:var(--text2); }
+    .module-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+    .tag { font-size:11px; padding:3px 9px; border-radius:20px; background:var(--surface2); color:var(--text3); border:1px solid var(--border); }
+
+    .tab-bar { display:flex; border-bottom:1px solid var(--border); margin-bottom:26px; overflow-x:auto; }
+    .tab-btn { padding:10px 16px; font-size:13px; font-weight:400; color:var(--text2); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; transition:color .15s,border-color .15s; margin-bottom:-1px; }
+    .tab-btn:hover { color:var(--text); }
+    .tab-btn.active { color:var(--blue); font-weight:600; border-bottom-color:var(--blue); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    .section-title { font-size:16px; font-weight:600; margin-bottom:10px; }
+    .body-text { font-size:14px; line-height:1.75; color:var(--text2); margin-bottom:16px; }
+
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+    @media (max-width:580px) { .two-col { grid-template-columns:1fr; } }
+
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+    .card-title { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .card p { font-size:13px; line-height:1.65; color:var(--text2); }
+    .card p+p { margin-top:6px; }
+
+    .badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+    .bs { background:var(--red-lt); color:var(--red-dk); }
+    .bp { background:var(--teal-lt); color:var(--teal-dk); }
+
+    .diagram-box { border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px; background:var(--surface2); padding:10px 0 4px; }
+
+    .ref-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px; }
+    .ref-table th { padding:9px 11px; text-align:left; background:var(--surface2); font-weight:600; font-size:12px; border-bottom:1px solid var(--border); color:var(--text2); }
+    .ref-table td { padding:8px 11px; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:top; line-height:1.5; }
+    .ref-table tr:last-child td { border-bottom:none; }
+    .ref-table tr:hover td { background:var(--surface2); }
+
+    .info-box { background:var(--blue-lt); border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:12px 16px; font-size:13px; color:var(--blue-dk); margin-bottom:16px; line-height:1.65; }
+    .warn-box { background:var(--amber-lt); border-left:3px solid var(--amber); border-radius:0 8px 8px 0; padding:12px 16px; font-size:13px; color:var(--amber-dk); margin-bottom:16px; line-height:1.65; }
+
+    .sim-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:20px; }
+    .sim-title { font-size:15px; font-weight:600; margin-bottom:14px; }
+    .posture-toggle { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+    .posture-btn { flex:1; min-width:120px; padding:10px; font-size:13px; border:1px solid var(--border2); border-radius:8px; background:var(--surface); cursor:pointer; color:var(--text2); transition:all .18s; }
+    .posture-btn:hover { background:var(--surface2); }
+    .posture-btn.active { background:var(--blue-lt); border-color:var(--blue); color:var(--blue-dk); font-weight:600; }
+
+    .bp-display { display:flex; align-items:center; justify-content:center; gap:28px; margin-bottom:20px; flex-wrap:wrap; }
+    .bp-metric { text-align:center; }
+    .bp-label { font-size:12px; color:var(--text3); margin-bottom:4px; }
+    .bp-value { font-size:30px; font-weight:700; transition:color .4s; }
+    .bp-unit { font-size:12px; color:var(--text3); }
+
+    .response-timeline { background:var(--surface2); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+    .timeline-step { display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-bottom:1px solid var(--border); }
+    .timeline-step:last-child { border-bottom:none; }
+    .step-num { min-width:22px; height:22px; border-radius:50%; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .step-num.symp { background:var(--red-lt); color:var(--red-dk); }
+    .step-num.para { background:var(--teal-lt); color:var(--teal-dk); }
+    .step-num.neutral { background:var(--surface2); color:var(--text3); border:1px solid var(--border2); }
+    .step-text { font-size:13px; color:var(--text2); line-height:1.6; }
+    .step-text strong { font-weight:600; color:var(--text); }
+
+    .q-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:14px; }
+    .q-text { font-size:14px; font-weight:600; margin-bottom:12px; line-height:1.5; }
+    .q-options { display:flex; flex-direction:column; gap:7px; }
+    .q-opt { padding:9px 14px; font-size:13px; border:1px solid var(--border2); border-radius:8px; cursor:pointer; background:var(--surface); color:var(--text2); transition:all .15s; text-align:left; }
+    .q-opt:hover { background:var(--surface2); }
+    .q-opt.correct { background:var(--teal-lt); border-color:var(--teal); color:var(--teal-dk); font-weight:600; }
+    .q-opt.wrong { background:var(--red-lt); border-color:var(--red); color:var(--red-dk); }
+    .q-feedback { font-size:13px; margin-top:10px; padding:10px 12px; background:var(--surface2); border-radius:8px; display:none; line-height:1.6; }
+    .quiz-score { text-align:center; padding:20px; }
+    .quiz-score .score-big { font-size:42px; font-weight:700; margin-bottom:8px; }
+    .restart-btn { margin-top:12px; padding:10px 24px; font-size:14px; border:1px solid var(--border2); border-radius:8px; background:var(--surface); cursor:pointer; color:var(--text2); }
+    .restart-btn:hover { background:var(--surface2); }
+    .progress-wrap { height:5px; background:var(--surface2); border-radius:3px; overflow:hidden; margin-bottom:16px; }
+    .progress-fill { height:100%; background:var(--blue); border-radius:3px; transition:width .4s ease; }
+    .quiz-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--text3); margin-bottom:8px; }
+
+    .footer { text-align:center; font-size:12px; color:var(--text3); padding:24px 0 8px; border-top:1px solid var(--border); margin-top:40px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo-pill">PhysioLab</span>
+  <span class="topbar-title">HPHY210 — Autonomic Nervous System</span>
+  <span class="topbar-sub">UKZN School of Health Sciences</span>
+</div>
+
+<div class="page-wrap">
+
+  <div class="module-header">
+    <div class="module-icon">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="13" r="11" stroke="#185FA5" stroke-width="1.8"/>
+        <path d="M13 6v7l4.5 2.5" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="13" cy="13" r="1.8" fill="#185FA5"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Autonomic Nervous System</h1>
+      <p>Structure and function · Neurotransmitters · Receptors · Postural blood pressure regulation</p>
+      <div class="module-tags">
+        <span class="tag">HPHY210</span>
+        <span class="tag">Endocrine &amp; ANS Block</span>
+        <span class="tag">Virtual Practical</span>
+        <span class="tag">Interactive</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+    <button class="tab-btn" onclick="showTab('divisions',this)">Divisions</button>
+    <button class="tab-btn" onclick="showTab('neurotransmitters',this)">Neurotransmitters &amp; Receptors</button>
+    <button class="tab-btn" onclick="showTab('postural',this)">Postural Blood Pressure</button>
+    <button class="tab-btn" onclick="showTab('quiz',this)">Quiz</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="tab-panel active" id="tab-overview">
+    <p class="section-title">What is the autonomic nervous system?</p>
+    <p class="body-text">The autonomic nervous system (ANS) is a division of the peripheral nervous system that regulates involuntary physiological processes — including heart rate, blood pressure, respiration, digestion, and pupil size — without conscious control. It works continuously to maintain homeostasis, often in concert with hormonal systems.</p>
+
+    <div class="diagram-box">
+      <svg width="100%" viewBox="0 0 680 330" role="img">
+        <title>ANS structural overview — two neuron chain</title>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <rect x="255" y="18" width="170" height="54" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+        <text x="340" y="41" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#0C447C">CNS</text>
+        <text x="340" y="59" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">Brain &amp; spinal cord</text>
+        <line x1="280" y1="72" x2="155" y2="120" stroke="#0F6E56" stroke-width="1.2" marker-end="url(#a1)"/>
+        <line x1="400" y1="72" x2="525" y2="120" stroke="#A32D2D" stroke-width="1.2" marker-end="url(#a1)"/>
+        <text x="184" y="100" text-anchor="middle" font-size="11" fill="#0F6E56">preganglionic</text>
+        <text x="500" y="100" text-anchor="middle" font-size="11" fill="#A32D2D">preganglionic</text>
+        <rect x="50" y="122" width="190" height="54" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="145" y="144" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#085041">Parasympathetic</text>
+        <text x="145" y="162" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">Terminal ganglion</text>
+        <rect x="440" y="122" width="190" height="54" rx="10" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="535" y="144" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#791F1F">Sympathetic</text>
+        <text x="535" y="162" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#A32D2D">Paravertebral ganglion</text>
+        <line x1="145" y1="176" x2="145" y2="232" stroke="#0F6E56" stroke-width="1.2" marker-end="url(#a1)"/>
+        <line x1="535" y1="176" x2="535" y2="232" stroke="#A32D2D" stroke-width="1.2" marker-end="url(#a1)"/>
+        <text x="106" y="213" text-anchor="middle" font-size="11" fill="#534AB7">ACh (muscarinic)</text>
+        <text x="577" y="213" text-anchor="middle" font-size="11" fill="#534AB7">NE (adrenergic)</text>
+        <text x="100" y="228" text-anchor="middle" font-size="11" fill="#0F6E56">postganglionic</text>
+        <text x="578" y="228" text-anchor="middle" font-size="11" fill="#A32D2D">postganglionic</text>
+        <rect x="50" y="234" width="190" height="50" rx="8" fill="#F1EFE8" stroke="#888" stroke-width="0.5"/>
+        <text x="145" y="255" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#1a1a1a">Effector organ</text>
+        <text x="145" y="271" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#555">Heart, vessels, glands, gut</text>
+        <rect x="440" y="234" width="190" height="50" rx="8" fill="#F1EFE8" stroke="#888" stroke-width="0.5"/>
+        <text x="535" y="255" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#1a1a1a">Effector organ</text>
+        <text x="535" y="271" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#555">Heart, vessels, glands, gut</text>
+        <rect x="234" y="298" width="12" height="12" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="250" y="308" font-size="12" fill="#0F6E56">Parasympathetic</text>
+        <rect x="380" y="298" width="12" height="12" rx="2" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="396" y="308" font-size="12" fill="#A32D2D">Sympathetic</text>
+      </svg>
+    </div>
+
+    <p class="section-title">Key structural features</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Two-neuron chain</div>
+        <p>All ANS pathways use a <strong>preganglionic neuron</strong> (CNS → ganglion) and a <strong>postganglionic neuron</strong> (ganglion → effector). This contrasts with somatic motor neurons, which synapse directly on skeletal muscle without a ganglion relay.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Ganglia</div>
+        <p>Ganglia are clusters of neuron cell bodies outside the CNS. Sympathetic ganglia lie close to the spinal cord (paravertebral chain). Parasympathetic ganglia are found near or within target organs (terminal ganglia).</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Dual innervation</div>
+        <p>Most visceral organs receive input from both divisions with opposing effects. This push-pull arrangement allows precise homeostatic control — e.g. sympathetic raises heart rate while parasympathetic lowers it.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Autonomic tone</div>
+        <p>Both divisions maintain a baseline firing rate (tone). Dominant parasympathetic tone at the SA node sets resting heart rate ~70 bpm. Increasing sympathetic tone or withdrawing vagal tone raises heart rate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVISIONS -->
+  <div class="tab-panel" id="tab-divisions">
+    <p class="body-text">The ANS has two principal divisions with broadly opposing functions. Understanding their anatomical origins and fibre lengths is key to predicting drug effects and clinical presentations.</p>
+
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card" style="border-color:#0F6E56">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span class="badge bp">Parasympathetic</span>
+          <span style="font-size:12px;color:var(--text3)">Rest &amp; digest</span>
+        </div>
+        <p><strong>Origin:</strong> Craniosacral — cranial nerves III, VII, IX, X (vagus) and sacral cord S2–S4.</p>
+        <p><strong>Ganglia:</strong> Terminal ganglia, near or within target organs. Very short postganglionic fibres.</p>
+        <p><strong>Effects:</strong> ↓ Heart rate, ↑ GI motility &amp; secretion, bronchoconstriction, pupil constriction (miosis), bladder contraction.</p>
+      </div>
+      <div class="card" style="border-color:#A32D2D">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span class="badge bs">Sympathetic</span>
+          <span style="font-size:12px;color:var(--text3)">Fight or flight</span>
+        </div>
+        <p><strong>Origin:</strong> Thoracolumbar — lateral horns of spinal cord T1–L2.</p>
+        <p><strong>Ganglia:</strong> Paravertebral chain ganglia close to spinal cord. Long postganglionic fibres.</p>
+        <p><strong>Effects:</strong> ↑ Heart rate &amp; contractility, vasoconstriction (skin, viscera), bronchodilation, ↑ blood glucose, pupil dilation (mydriasis), sweating.</p>
+      </div>
+    </div>
+
+    <p class="section-title">Comparative summary</p>
+    <table class="ref-table">
+      <thead>
+        <tr><th>Feature</th><th style="color:#085041">Parasympathetic</th><th style="color:#791F1F">Sympathetic</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Spinal origin</td><td>Craniosacral (CN III, VII, IX, X; S2–S4)</td><td>Thoracolumbar (T1–L2)</td></tr>
+        <tr><td>Ganglion location</td><td>Near / within target organ</td><td>Paravertebral or prevertebral chain</td></tr>
+        <tr><td>Preganglionic fibre</td><td>Long</td><td>Short</td></tr>
+        <tr><td>Postganglionic fibre</td><td>Short</td><td>Long</td></tr>
+        <tr><td>Preganglionic NT</td><td>Acetylcholine (ACh)</td><td>Acetylcholine (ACh)</td></tr>
+        <tr><td>Postganglionic NT</td><td>Acetylcholine (ACh)</td><td>Norepinephrine (NE) — mostly</td></tr>
+        <tr><td>Ganglion receptor</td><td>Nicotinic N<sub>N</sub></td><td>Nicotinic N<sub>N</sub></td></tr>
+        <tr><td>Effector receptor</td><td>Muscarinic (M₁–M₅)</td><td>Adrenergic (α₁, α₂, β₁, β₂, β₃)</td></tr>
+        <tr><td>Heart rate</td><td>↓ (bradycardia)</td><td>↑ (tachycardia)</td></tr>
+        <tr><td>Blood vessels (skin)</td><td>Minimal effect</td><td>Vasoconstriction (α₁)</td></tr>
+        <tr><td>Bronchi</td><td>Constriction (M₃)</td><td>Dilation (β₂)</td></tr>
+        <tr><td>GI motility</td><td>↑ (peristalsis)</td><td>↓ (inhibition)</td></tr>
+        <tr><td>Pupil</td><td>Constriction — miosis</td><td>Dilation — mydriasis</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn-box">
+      <strong>Adrenal medulla — special case:</strong> Innervated by sympathetic <em>preganglionic</em> fibres directly (no postganglionic neuron). Chromaffin cells act as modified neurons, secreting epinephrine (~80%) and norepinephrine (~20%) directly into the bloodstream — amplifying the sympathetic response systemically.
+    </div>
+  </div>
+
+  <!-- NEUROTRANSMITTERS & RECEPTORS -->
+  <div class="tab-panel" id="tab-neurotransmitters">
+    <p class="body-text">Neurotransmitter identity depends on the division and whether the neuron is preganglionic or postganglionic. The receptor subtype on the target cell determines the downstream cellular response via a specific second-messenger pathway.</p>
+
+    <div class="diagram-box">
+      <svg width="100%" viewBox="0 0 680 370" role="img">
+        <title>ANS neurotransmitter pathway diagram</title>
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <text x="290" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Parasympathetic</text>
+        <text x="530" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#791F1F">Sympathetic</text>
+        <text x="38" y="62" font-size="11" font-weight="600" fill="#888">Preganglionic</text>
+        <text x="38" y="122" font-size="11" font-weight="600" fill="#888">NT / Receptor</text>
+        <text x="38" y="162" font-size="11" font-weight="600" fill="#888">Ganglion</text>
+        <text x="38" y="225" font-size="11" font-weight="600" fill="#888">NT / Receptor</text>
+        <text x="38" y="266" font-size="11" font-weight="600" fill="#888">Postganglionic</text>
+        <text x="38" y="330" font-size="11" font-weight="600" fill="#888">NT / Receptor</text>
+        <!-- PARA -->
+        <rect x="198" y="42" width="184" height="36" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="290" y="60" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#04342C">Preganglionic neuron</text>
+        <line x1="290" y1="78" x2="290" y2="106" stroke="#0F6E56" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="290" y="102" text-anchor="middle" font-size="11" fill="#534AB7">ACh → Nicotinic (N&#x2099;)</text>
+        <rect x="198" y="108" width="184" height="34" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="290" y="125" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">Ganglion</text>
+        <line x1="290" y1="142" x2="290" y2="168" stroke="#0F6E56" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="290" y="163" text-anchor="middle" font-size="11" fill="#534AB7">ACh → Muscarinic (M)</text>
+        <rect x="198" y="170" width="184" height="36" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="290" y="188" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#04342C">Postganglionic neuron</text>
+        <line x1="290" y1="206" x2="290" y2="234" stroke="#0F6E56" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="290" y="228" text-anchor="middle" font-size="11" fill="#534AB7">ACh → Muscarinic (M)</text>
+        <rect x="198" y="236" width="184" height="34" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="290" y="253" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">Effector organ</text>
+        <!-- SYMP -->
+        <rect x="430" y="42" width="200" height="36" rx="8" fill="#F7C1C1" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="530" y="60" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#501313">Preganglionic neuron</text>
+        <line x1="530" y1="78" x2="530" y2="106" stroke="#A32D2D" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="530" y="102" text-anchor="middle" font-size="11" fill="#534AB7">ACh → Nicotinic (N&#x2099;)</text>
+        <rect x="430" y="108" width="200" height="34" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="530" y="125" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#791F1F">Paravertebral ganglion</text>
+        <line x1="530" y1="142" x2="530" y2="168" stroke="#A32D2D" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="530" y="163" text-anchor="middle" font-size="11" fill="#534AB7">NE → Adrenergic (α/β)</text>
+        <rect x="430" y="170" width="200" height="36" rx="8" fill="#F7C1C1" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="530" y="188" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#501313">Postganglionic neuron</text>
+        <line x1="530" y1="206" x2="530" y2="234" stroke="#A32D2D" stroke-width="1.1" marker-end="url(#a2)"/>
+        <text x="530" y="228" text-anchor="middle" font-size="11" fill="#534AB7">NE → Adrenergic (α/β)</text>
+        <rect x="430" y="236" width="200" height="34" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="530" y="253" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#791F1F">Effector organ</text>
+        <!-- Key insight -->
+        <rect x="80" y="284" width="520" height="76" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.8"/>
+        <text x="340" y="308" text-anchor="middle" font-size="13" font-weight="600" fill="#3C3489">Key principle: preganglionic NT is always ACh (both divisions)</text>
+        <text x="340" y="328" text-anchor="middle" font-size="12" fill="#534AB7">The divisions diverge at the postganglionic synapse:</text>
+        <text x="340" y="348" text-anchor="middle" font-size="12" fill="#534AB7">Parasympathetic → ACh / Muscarinic     |     Sympathetic → NE / Adrenergic (α/β)</text>
+      </svg>
+    </div>
+
+    <p class="section-title">Receptor subtypes — detailed reference</p>
+    <table class="ref-table">
+      <thead>
+        <tr><th>Receptor</th><th>Division</th><th>Location</th><th>2nd messenger</th><th>Key effects</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nicotinic N<sub>N</sub></strong></td>
+          <td><span class="badge bp" style="margin-right:3px">Para</span><span class="badge bs">Symp</span></td>
+          <td>All autonomic ganglia; adrenal medulla</td>
+          <td>Ligand-gated Na⁺/K⁺ channel — fast EPSP</td>
+          <td>Depolarises postganglionic neuron → action potential</td>
+        </tr>
+        <tr>
+          <td><strong>Muscarinic M₂</strong></td>
+          <td><span class="badge bp">Para</span></td>
+          <td>SA node, AV node, atria</td>
+          <td>Gᵢ → ↓ cAMP; opens IKACh channel</td>
+          <td>↓ Heart rate (negative chronotropy), ↓ AV conduction velocity</td>
+        </tr>
+        <tr>
+          <td><strong>Muscarinic M₃</strong></td>
+          <td><span class="badge bp">Para</span></td>
+          <td>Smooth muscle, exocrine glands</td>
+          <td>Gq → ↑ IP₃/DAG → ↑ intracellular Ca²⁺</td>
+          <td>Bronchoconstriction, ↑ glandular secretion, pupil constriction, bladder contraction</td>
+        </tr>
+        <tr>
+          <td><strong>α₁ adrenergic</strong></td>
+          <td><span class="badge bs">Symp</span></td>
+          <td>Vascular smooth muscle, skin, GI sphincters</td>
+          <td>Gq → ↑ IP₃ → ↑ Ca²⁺</td>
+          <td>Vasoconstriction → ↑ total peripheral resistance → ↑ BP</td>
+        </tr>
+        <tr>
+          <td><strong>α₂ adrenergic</strong></td>
+          <td><span class="badge bs">Symp</span></td>
+          <td>Presynaptic terminals, platelets, CNS</td>
+          <td>Gᵢ → ↓ cAMP</td>
+          <td>Auto-inhibitory: reduces NE release (negative feedback)</td>
+        </tr>
+        <tr>
+          <td><strong>β₁ adrenergic</strong></td>
+          <td><span class="badge bs">Symp</span></td>
+          <td>Heart (SA node, AV node, ventricles), JGA of kidney</td>
+          <td>Gs → ↑ cAMP → PKA activation</td>
+          <td>↑ Heart rate (chronotropy), ↑ contractility (inotropy), ↑ renin release</td>
+        </tr>
+        <tr>
+          <td><strong>β₂ adrenergic</strong></td>
+          <td><span class="badge bs">Symp</span></td>
+          <td>Bronchial &amp; uterine smooth muscle; skeletal muscle vasculature</td>
+          <td>Gs → ↑ cAMP → PKA activation</td>
+          <td>Bronchodilation, vasodilation, uterine relaxation</td>
+        </tr>
+        <tr>
+          <td><strong>β₃ adrenergic</strong></td>
+          <td><span class="badge bs">Symp</span></td>
+          <td>Adipose tissue, bladder (detrusor)</td>
+          <td>Gs → ↑ cAMP → PKA activation</td>
+          <td>Lipolysis, thermogenesis, bladder relaxation</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <strong>Clinical pharmacology:</strong> Beta-blockers (propranolol, metoprolol) block β₁ → ↓ heart rate and contractility — used in hypertension and heart failure. Salbutamol activates β₂ selectively → bronchodilation in asthma. Prazosin blocks α₁ → vasodilation for hypertension. Atropine blocks muscarinic receptors → ↑ heart rate (used in bradycardia and organophosphate poisoning).
+    </div>
+  </div>
+
+  <!-- POSTURAL BP -->
+  <div class="tab-panel" id="tab-postural">
+    <p class="body-text">When you move from lying to standing, approximately 500 ml of blood shifts downwards by gravity into the lower limbs and splanchnic circulation. This transiently reduces venous return and cardiac output. The ANS must correct this rapidly via the baroreflex to prevent dizziness or fainting.</p>
+
+    <div class="sim-card">
+      <div class="sim-title">Interactive postural blood pressure simulator</div>
+      <div class="posture-toggle">
+        <button class="posture-btn active" onclick="setPosture('supine',this)">Supine (lying)</button>
+        <button class="posture-btn" onclick="setPosture('sitting',this)">Sitting</button>
+        <button class="posture-btn" onclick="setPosture('standing',this)">Standing (0–5 s)</button>
+        <button class="posture-btn" onclick="setPosture('compensated',this)">Standing (compensated)</button>
+      </div>
+
+      <div class="bp-display">
+        <div class="bp-metric">
+          <div class="bp-label">Systolic BP</div>
+          <div class="bp-value" id="bp-sys" style="color:var(--blue)">120</div>
+          <div class="bp-unit">mmHg</div>
+        </div>
+        <div class="bp-metric">
+          <div class="bp-label">Diastolic BP</div>
+          <div class="bp-value" id="bp-dia" style="color:var(--blue)">80</div>
+          <div class="bp-unit">mmHg</div>
+        </div>
+        <div class="bp-metric">
+          <div class="bp-label">Heart rate</div>
+          <div class="bp-value" id="hr-val" style="color:var(--red)">70</div>
+          <div class="bp-unit">bpm</div>
+        </div>
+        <div class="bp-metric">
+          <div class="bp-label">Dominant tone</div>
+          <div class="bp-value" id="dom-ans" style="font-size:16px;color:var(--teal)">Parasympathetic</div>
+        </div>
+      </div>
+
+      <div id="timeline-box" class="response-timeline">
+        <div class="timeline-step">
+          <div class="step-num neutral">—</div>
+          <div class="step-text">Select a posture above to see the ANS response sequence.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-title">The baroreflex arc</p>
+    <div class="diagram-box">
+      <svg width="100%" viewBox="0 0 680 285" role="img">
+        <title>Baroreflex arc diagram</title>
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <rect x="20" y="108" width="155" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.8"/>
+        <text x="97" y="129" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#412402">Baroreceptors</text>
+        <text x="97" y="147" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#633806">Carotid sinus / aortic arch</text>
+        <line x1="175" y1="134" x2="238" y2="134" stroke="#BA7517" stroke-width="1.1" marker-end="url(#a3)"/>
+        <text x="207" y="126" text-anchor="middle" font-size="11" fill="#888">afferent IX, X</text>
+        <rect x="240" y="98" width="170" height="72" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+        <text x="325" y="120" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#0C447C">Medullary centres</text>
+        <text x="325" y="138" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#185FA5">NTS, RVLM, CVLM</text>
+        <text x="325" y="155" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#185FA5">Nucleus ambiguus (CN X)</text>
+        <path d="M410 116 Q450 116 470 76" stroke="#A32D2D" stroke-width="1.1" fill="none" marker-end="url(#a3)"/>
+        <text x="464" y="70" font-size="11" fill="#A32D2D">Sympathetic ↑ NE</text>
+        <rect x="464" y="40" width="182" height="42" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.8"/>
+        <text x="555" y="57" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#791F1F">Heart / vessels</text>
+        <text x="555" y="73" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#A32D2D">↑ HR, ↑ contractility, vasoconstriction</text>
+        <path d="M410 152 Q450 152 470 194" stroke="#0F6E56" stroke-width="1.1" fill="none" marker-end="url(#a3)"/>
+        <text x="464" y="212" font-size="11" fill="#0F6E56">Parasympathetic (vagal)</text>
+        <rect x="464" y="196" width="182" height="42" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+        <text x="555" y="213" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#085041">Heart (SA node)</text>
+        <text x="555" y="229" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#0F6E56">↓ HR — normal resting tone</text>
+        <path d="M555 40 L555 18 L97 18 L97 106" stroke="#185FA5" stroke-width="0.8" stroke-dasharray="4 3" fill="none" marker-end="url(#a3)"/>
+        <text x="320" y="12" text-anchor="middle" font-size="11" fill="#185FA5">↑ BP → ↑ baroreceptor stretch → ↑ firing → inhibits sympathetic (negative feedback)</text>
+        <text x="20" y="93" font-size="11" fill="#A32D2D">↓ BP on standing</text>
+        <text x="20" y="108" font-size="11" fill="#A32D2D">→ ↓ baroreceptor stretch</text>
+        <text x="20" y="176" font-size="11" fill="#A32D2D">→ ↓ afferent firing</text>
+        <text x="20" y="190" font-size="11" fill="#A32D2D">→ ↑ sympathetic</text>
+      </svg>
+    </div>
+
+    <p class="section-title">Orthostatic hypotension</p>
+    <p class="body-text">When the baroreflex fails to fully compensate for postural change, a sustained fall in blood pressure of ≥20 mmHg systolic (or ≥10 mmHg diastolic) within 3 minutes of standing constitutes <strong>orthostatic (postural) hypotension</strong>.</p>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Common causes</div>
+        <p>Dehydration / hypovolaemia · Autonomic neuropathy (diabetes, Parkinson's disease) · Medications (antihypertensives, diuretics, tricyclic antidepressants, alpha-blockers) · Prolonged bed rest · Age-related baroreflex dysfunction.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Clinical assessment</div>
+        <p>Symptoms: dizziness, light-headedness, blurred vision, presyncope or syncope on standing. Diagnosis: measure supine BP, then standing BP at 1, 3, and 5 minutes. A drop ≥20/10 mmHg confirms the diagnosis.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="tab-panel" id="tab-quiz">
+    <div id="quiz-container"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>PhysioLab · HPHY210 Autonomic Nervous System · UKZN School of Health Sciences</p>
+  <p style="margin-top:4px">For educational use only. Not a substitute for your prescribed textbook or lecture notes.</p>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'quiz') initQuiz();
+}
+
+const postures = {
+  supine:{sys:120,dia:80,hr:70,ans:'Parasympathetic',ansColor:'var(--teal)',steps:[
+    {c:'para',t:'<strong>Baseline state.</strong> In the supine position gravity exerts minimal effect on venous distribution. Blood is evenly distributed throughout the body.'},
+    {c:'para',t:'<strong>Baroreceptors</strong> in the carotid sinus fire at a moderate steady rate, signalling adequate arterial pressure to the medullary cardiovascular centres.'},
+    {c:'para',t:'<strong>Parasympathetic (vagal) tone dominates</strong> at the SA node via the vagus nerve (CN X), maintaining resting heart rate at approximately 60–80 bpm.'}
+  ]},
+  sitting:{sys:115,dia:78,hr:72,ans:'Balanced',ansColor:'var(--text)',steps:[
+    {c:'neutral',t:'<strong>Slight positional change.</strong> A modest volume shift to the lower extremities and abdomen reduces venous return marginally.'},
+    {c:'symp',t:'<strong>Mild sympathetic activation</strong> compensates immediately. The baroreflex is triggered only subtly.'},
+    {c:'para',t:'<strong>Net result:</strong> Blood pressure and heart rate remain near baseline. Both divisions are active in a balanced state.'}
+  ]},
+  standing:{sys:96,dia:65,hr:92,ans:'Transitional ↓ BP',ansColor:'var(--amber)',steps:[
+    {c:'symp',t:'<strong>Gravity pools ~500 ml blood</strong> into the venous capacitance vessels of the legs and splanchnic circulation within seconds of standing.'},
+    {c:'symp',t:'<strong>Venous return drops sharply</strong> → stroke volume falls (Frank-Starling mechanism) → cardiac output decreases → arterial BP falls transiently (systolic may drop 10–20 mmHg).'},
+    {c:'symp',t:'<strong>Baroreceptors detect reduced wall stretch</strong> → decrease afferent firing rate → less inhibitory signal travels via CN IX and X to the medullary NTS.'},
+    {c:'symp',t:'<strong>Medullary response:</strong> Reduced baroreceptor input disinhibits the RVLM → sympathetic outflow increases; nucleus ambiguus reduces vagal outflow to the heart.'}
+  ]},
+  compensated:{sys:122,dia:83,hr:82,ans:'Sympathetic ↑',ansColor:'var(--red)',steps:[
+    {c:'symp',t:'<strong>Sympathetic postganglionic fibres release NE</strong> → binds α₁ receptors on arteriolar and venous smooth muscle → vasoconstriction → ↑ venous return and ↑ total peripheral resistance.'},
+    {c:'symp',t:'<strong>β₁ receptor activation at the SA node</strong> → ↑ heart rate (reflex tachycardia, typically +10–15 bpm above supine baseline).'},
+    {c:'symp',t:'<strong>β₁ activation on ventricular myocardium</strong> → ↑ force of contraction (positive inotropy) → partially restores stroke volume.'},
+    {c:'symp',t:'<strong>BP normalises within 10–30 seconds</strong> in a healthy individual. Restored baroreceptor stretch inhibits further sympathetic activation via negative feedback.'},
+    {c:'para',t:'<strong>Net standing state:</strong> BP is maintained near baseline. Heart rate remains slightly elevated due to ongoing mild sympathetic tone and partial withdrawal of vagal tone.'}
+  ]}
+};
+
+function setPosture(key,btn){
+  document.querySelectorAll('.posture-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const d=postures[key];
+  document.getElementById('bp-sys').textContent=d.sys;
+  document.getElementById('bp-dia').textContent=d.dia;
+  document.getElementById('hr-val').textContent=d.hr;
+  const ae=document.getElementById('dom-ans');
+  ae.textContent=d.ans; ae.style.color=d.ansColor;
+  document.getElementById('bp-sys').style.color=d.sys<105?'var(--amber)':'var(--blue)';
+  document.getElementById('timeline-box').innerHTML=d.steps.map(s=>`
+    <div class="timeline-step">
+      <div class="step-num ${s.c}">${s.c==='symp'?'S':s.c==='para'?'P':'—'}</div>
+      <div class="step-text">${s.t}</div>
+    </div>`).join('');
+}
+
+const questions=[
+  {q:'What neurotransmitter is released by ALL autonomic preganglionic neurons, in both the sympathetic and parasympathetic divisions?',opts:['Norepinephrine','Acetylcholine','Dopamine','Serotonin'],ans:1,fb:'Correct. All preganglionic neurons release acetylcholine (ACh), which acts on nicotinic N_N receptors in the ganglion to generate a fast EPSP in the postganglionic neuron.'},
+  {q:'Which muscarinic receptor subtype mediates the parasympathetic slowing of heart rate at the SA node?',opts:['M₁','M₂','M₃','M₅'],ans:1,fb:'Correct. M₂ receptors couple to Gᵢ, reducing cAMP and opening K⁺ (IKACh) channels, hyperpolarising pacemaker cells and slowing spontaneous depolarisation.'},
+  {q:'What is the IMMEDIATE haemodynamic event within the first 0–5 seconds of standing upright?',opts:['Reflex tachycardia due to sympathetic activation','Transient fall in BP due to venous pooling in the lower limbs','Increase in vagal tone to the heart','Arteriolar vasodilation in the periphery'],ans:1,fb:'Correct. Gravity shifts ~500 ml into lower limb veins, reducing venous return and cardiac output before the baroreflex has time to compensate.'},
+  {q:'Which adrenergic receptor subtype primarily mediates arteriolar vasoconstriction during the compensatory response to standing?',opts:['β₁ adrenergic','β₂ adrenergic','α₁ adrenergic','Nicotinic N_M'],ans:2,fb:'Correct. NE from sympathetic postganglionic fibres binds α₁ receptors (coupled to Gq → ↑ Ca²⁺) on vascular smooth muscle, causing vasoconstriction that raises total peripheral resistance.'},
+  {q:'Where are the cell bodies of sympathetic preganglionic neurons located?',opts:['Brainstem and sacral cord S2–S4','Lateral horn of the thoracolumbar spinal cord (T1–L2)','Hypothalamus only','Within the paravertebral chain ganglia'],ans:1,fb:'Correct. Sympathetic preganglionic neurons originate in the intermediolateral cell column (lateral horn) of the thoracolumbar spinal cord (T1–L2).'},
+  {q:'Orthostatic hypotension is formally defined as a sustained fall in systolic BP of at least _____ mmHg within 3 minutes of standing.',opts:['10 mmHg','20 mmHg','30 mmHg','40 mmHg'],ans:1,fb:'Correct. The definition requires a drop of ≥20 mmHg systolic OR ≥10 mmHg diastolic within 3 minutes of standing, typically with dizziness or presyncope.'},
+  {q:'Which second-messenger pathway is activated by α₁ adrenergic receptor stimulation?',opts:['Gᵢ → ↓ cAMP','Gs → ↑ cAMP via adenylyl cyclase','Gq → ↑ IP₃/DAG → ↑ intracellular Ca²⁺','Ligand-gated Na⁺/K⁺ channel opening'],ans:2,fb:'Correct. α₁ receptors couple to Gq, activating phospholipase C to generate IP₃ and DAG. IP₃ triggers Ca²⁺ release from the sarcoplasmic reticulum causing smooth muscle contraction and vasoconstriction.'},
+  {q:'What is unique about the innervation of the adrenal medulla compared to other sympathetic targets?',opts:['It is innervated by parasympathetic fibres only','Preganglionic sympathetic fibres synapse directly on chromaffin cells — there is no postganglionic neuron','It receives somatic motor innervation','It secretes only acetylcholine into the bloodstream'],ans:1,fb:'Correct. The adrenal medulla is derived from neural crest cells. Preganglionic cholinergic fibres synapse directly on chromaffin cells, which release epinephrine (~80%) and norepinephrine (~20%) into the circulation.'}
+];
+
+let qs={i:0,score:0,done:[]};
+
+function initQuiz(){qs={i:0,score:0,done:Array(questions.length).fill(false)};renderQ();}
+
+function renderQ(){
+  const c=document.getElementById('quiz-container');
+  if(qs.i>=questions.length){
+    const pct=Math.round((qs.score/questions.length)*100);
+    const msg=pct>=75?'Excellent — well done!':pct>=50?'Good effort. Review any missed concepts in the tabs above.':'Review the Divisions and Neurotransmitters tabs, then try again.';
+    c.innerHTML=`<div class="quiz-score"><div class="score-big" style="color:${pct>=75?'var(--teal)':pct>=50?'var(--amber)':'var(--red)'}">${qs.score}/${questions.length}</div><p style="font-size:15px;color:var(--text2);margin-bottom:6px">${msg}</p><button class="restart-btn" onclick="initQuiz()">Restart quiz</button></div>`;
+    return;
+  }
+  const q=questions[qs.i];
+  const pct=Math.round((qs.i/questions.length)*100);
+  c.innerHTML=`
+    <div class="quiz-meta"><span>Question ${qs.i+1} of ${questions.length}</span><span>Score: ${qs.score}</span></div>
+    <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="q-item">
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">${q.opts.map((o,i)=>`<button class="q-opt" onclick="answerQ(${i})">${o}</button>`).join('')}</div>
+      <div class="q-feedback" id="qfb"></div>
+    </div>`;
+}
+
+function answerQ(idx){
+  if(qs.done[qs.i])return;
+  qs.done[qs.i]=true;
+  const q=questions[qs.i];
+  const opts=document.querySelectorAll('.q-opt');
+  opts[q.ans].classList.add('correct');
+  if(idx!==q.ans)opts[idx].classList.add('wrong');
+  else qs.score++;
+  const fb=document.getElementById('qfb');
+  fb.textContent=(idx===q.ans?'✓ ':'✗ ')+q.fb;
+  fb.style.display='block';
+  fb.style.color=idx===q.ans?'var(--teal)':'var(--red)';
+  opts.forEach(o=>o.style.cursor='default');
+  setTimeout(()=>{qs.i++;renderQ();},2400);
+}
+
+initQuiz();
+</script>
+</body>
+</html>
